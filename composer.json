@@ -1,0 +1,23 @@
+{
+    "name": "simexis/laravel-casset",
+    "description": "An asset management package for Laravel 5.",
+    "keywords": ["laravel", "assets", "asset", "css", "javascript", "less", "compression", "minification"],
+    "authors": [
+        {
+            "name": "Georgi Nachev",
+            "email": "jooorooo@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+		"illuminate/support": ">=5.0.0",
+        "oyejorge/less.php": ">=1.7.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Simexis\\Casset": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "license": "MIT"
+}
