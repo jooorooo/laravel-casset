@@ -1,8 +1,9 @@
-<?php namespace Simexis\Casset;
+<?php
+
+namespace Simexis\Casset;
 
 use Closure;
 use Less_Parser;
-use Illuminate\Support\Facades\HTML;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
 
@@ -153,13 +154,22 @@ class Container
 	 */
 	public function add($source, array $attributes = array(), array $dependencies = array())
 	{
-		$ext = pathinfo($source, PATHINFO_EXTENSION);
-		
-		$this->assets[$source] = compact('ext', 'source', 'attributes', 'dependencies');
+		if(is_array($source)) {
+			$sources = $source;
+			foreach($sources AS $source) {
+				$ext = pathinfo($source, PATHINFO_EXTENSION);
+
+				$this->assets[$source] = compact('ext', 'source', 'attributes', 'dependencies');
+			}
+		} else {
+			$ext = pathinfo($source, PATHINFO_EXTENSION);
+
+			$this->assets[$source] = compact('ext', 'source', 'attributes', 'dependencies');
+		}
 	}
 	
 	/**
-	 * Get the HTML links to all of the registered CSS assets.
+	 * Get the Html links to all of the registered CSS assets.
 	 *
 	 * @return string
 	 */
@@ -189,22 +199,22 @@ class Container
 		
 		$links = array();
 		foreach ($assets as $asset) {
-			$url = $this->cdn ? $this->cdn . $asset['url'] : $asset['url'];
-			$links[] = HTML::style($url, $asset['attributes']);
+			$url = $this->cdn ? $this->cdn . $asset['url'] : asset($asset['url']);
+			$links[] = Html::cssFile($url, $asset['attributes']);
 		}
 		
 		return implode('', $links);
 	}
 	
 	/**
-	 * Get the HTML links to all of the registered JavaScript assets.
+	 * Get the Html links to all of the registered JavaScript assets.
 	 *
 	 * @return string
 	 */
 	public function scripts()
 	{
 		$assets = array();
-		
+
 		foreach ($this->assets as $asset) {
 			if ('js' !== $asset['ext']) {
 				continue;
@@ -227,8 +237,8 @@ class Container
 		
 		$links = array();
 		foreach ($assets as $asset) {
-			$url = $this->cdn ? $this->cdn . $asset['url'] : $asset['url'];
-			$links[] = HTML::script($url, $asset['attributes']);
+			$url = $this->cdn ? $this->cdn . $asset['url'] : asset($asset['url']);
+			$links[] = Html::scriptFile($url, $asset['attributes']);
 		}
 		
 		return implode('', $links);
@@ -236,7 +246,7 @@ class Container
 	
 	/**
 	 * Prepare the given assets to be rendered to call the Casset controller
-	 * and return the HTML link to that resource.
+	 * and return the Html link to that resource.
 	 *
 	 * @param array  $assets
 	 * @param string $type
@@ -265,10 +275,10 @@ class Container
 				$url .= $this->version ? '&v=' . $this->version : '';
 				
 				if ('style' == $type) {
-					$links[] = HTML::style($url, $attributes);
+					$links[] = Html::cssFile($url, $attributes);
 				}
 				else {
-					$links[] = HTML::script($url, $attributes);
+					$links[] = Html::scriptFile($url, $attributes);
 				}
 			}
 		}
@@ -278,10 +288,10 @@ class Container
 			$url .= $this->version ? '&v=' . $this->version : '';
 			
 			if ('style' == $type) {
-				$links[] = HTML::style($url);
+				$links[] = Html::cssFile($url);
 			}
 			else {
-				$links[] = HTML::script($url);
+				$links[] = Html::scriptFile($url);
 			}
 		}
 		
@@ -345,7 +355,7 @@ class Container
 			$url = $this->cdn($source);
 		}
 		
-		return HTML::image($url, $alt, $attributes);
+		return Html::image($url, $alt, $attributes);
 	}
 	
 	/**
@@ -597,7 +607,7 @@ class Container
 		$lastmod = 0;
 		foreach ($assets as $asset) {
 			$paths[] = $asset['path'];
-			$mod = File::lastModified($asset['path']);
+			$mod = @File::lastModified($asset['path']);
 			if ($mod > $lastmod) {
 				$lastmod = $mod;
 			}
@@ -623,6 +633,13 @@ class Container
 				}
 				
 				$c = File::get($asset['path']);
+
+                if($asset['ext'] == 'css' && preg_match_all('~url\(([\"\'^\)]*)?([^\)]*)([\"\'^\)]*)?\)~i', $c, $match)) {
+                    foreach($match[2] AS $row=> $link) {
+                        $link = UrlFormat::toAbsolute(asset($asset['url']), $link);
+                        $c = str_replace($match[0][$row], 'url("' . preg_replace('~^https?:~i', '', $link) . '")', $c);
+                    }
+                }
 				
 				if ($this->minify
 					&& !(stripos($asset['source'], '.min')

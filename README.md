@@ -1,6 +1,8 @@
 Casset Package for Laravel 5
 ============================
 
+This package is baset on https://github.com/mmanos/laravel-casset
+
 Casset is an asset manager for Laravel 5 applications. Some things it can do:
 
 * Create one or more asset containers.
@@ -29,7 +31,7 @@ Add the service provider to `app/config/app.php`, within the `providers` array.
 ```php
 'providers' => array(
 	// ...
-	Simexsis\Casset\CassetServiceProvider::class,
+	Simexis\Casset\CassetServiceProvider::class,
 )
 ```
 
@@ -38,7 +40,7 @@ Add a class alias to `app/config/app.php`, within the `aliases` array.
 ```php
 'aliases' => array(
 	// ...
-	'Casset' => Simexsis\Casset\Facades\Casset::class,
+	'Casset' => Simexis\Casset\Facades\Casset::class,
 )
 ```
 

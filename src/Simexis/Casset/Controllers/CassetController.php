@@ -1,5 +1,6 @@
 <?php namespace Simexis\Casset\Controllers;
 
+use Simexis\Casset\Casset;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Input;
@@ -36,14 +37,14 @@ class CassetController extends Controller
 		}
 		
 		foreach ($files as $file) {
-			Facades\Casset::container($container)->add(
+			Casset::container($container)->add(
 				array_get($file, 'source'),
 				array(),
 				array_get($file, 'dependencies', array())
 			);
 		}
 		
-		$response = Response::make(Facades\Casset::container($container)->content($type));
+		$response = Response::make(Casset::container($container)->content($type));
 		
 		if ('style' == $type) {
 			$response->headers->set('Content-Type', 'text/css');
