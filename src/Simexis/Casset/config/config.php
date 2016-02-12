@@ -108,6 +108,10 @@ return array(
 	|
 	*/
 	'collections' => [
+		// jQuery (CDN)
+		'jquery-cdn' => array('//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+		
+		// Twitter Bootstrap (CDN)
 		'bootstrap-cdn' => array(
 			'jquery-cdn',
 			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
