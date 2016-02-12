@@ -97,4 +97,27 @@ return array(
 
 	'cdn' => '',
 
+	/*
+	|--------------------------------------------------------------------------
+	| Collections
+	|--------------------------------------------------------------------------
+	|
+	| * Available collections.
+	| * Each collection is an array of assets.
+	| * Collections may also contain other collections.
+	|
+	*/
+	'collections' => [
+		// jQuery (CDN)
+		'jquery-cdn' => array('//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+		
+		// Twitter Bootstrap (CDN)
+		'bootstrap-cdn' => array(
+			'jquery-cdn',
+			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
+			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css',
+			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'
+		),
+	],
+
 );
