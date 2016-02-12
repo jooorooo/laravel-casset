@@ -97,4 +97,23 @@ return array(
 
 	'cdn' => '',
 
+	/*
+	|--------------------------------------------------------------------------
+	| Collections
+	|--------------------------------------------------------------------------
+	|
+	| * Available collections.
+	| * Each collection is an array of assets.
+	| * Collections may also contain other collections.
+	|
+	*/
+	'collections' => [
+		'bootstrap-cdn' => array(
+			'jquery-cdn',
+			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css',
+			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css',
+			'//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'
+		),
+	],
+
 );
