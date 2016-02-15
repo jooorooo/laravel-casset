@@ -107,6 +107,9 @@ class Container
 	 */
 	protected static $cached_paths = array();
 
+	public $collections = array();
+	public $show_refer;
+
 	/**
 	 * Initialize an instance of this class.
 	 *
@@ -135,6 +138,9 @@ class Container
 			$v = $this->version;
 			$this->version = (string) $v();
 		}
+
+		$this->collections = Config::get('casset.collections', array());
+		$this->show_refer  = Config::get('casset.show_refer', true);
 	}
 
 	/**
@@ -154,22 +160,19 @@ class Container
 	 */
 	public function add($source, array $attributes = array(), array $dependencies = array())
 	{
-		static $collections = null;
-		if( $collections === null )
-			 $collections = Config::get('casset.collections',array());
 
 		if( is_array($source) )
 		{
 			$sources = $source;
 			foreach($sources AS $source)
 			{
-				if( isset($collections[$source]) ) $source = $collections[$source];
+				if( isset($this->collections[$source]) ) $source = $this->collections[$source];
 				$this->add($source, $attributes, $dependencies);
 			}
 		}
 		else
 		{
-			if( isset($collections[$source]) ) $source = $collections[$source];
+			if( isset($this->collections[$source]) ) $source = $this->collections[$source];
 
 			if( is_array($source) )
 			{
@@ -686,7 +689,11 @@ class Container
 			}
 		}
 
-		$file = $this->cache_path . '/casset-' . md5(implode(',', $paths) . $lastmod) . '-' . $this->name;
+		if( $this->show_refer )
+			$file = $this->cache_path . '/casset-' . md5(implode(',', $paths) . $lastmod) . '-' . $this->name;
+		else
+			$file = $this->cache_path . '/' . md5(implode(',', $paths) . $lastmod);
+
 		$file .= ('script' === $type) ? '.js' : '.css';
 
 		$combine = false;
@@ -721,16 +728,26 @@ class Container
 				) {
 					switch ($type) {
 						case 'style':
-							$c = Compressors\Css::process($c);
+							$min = new \CSSmin();
+							$c = $min->run($c);
+							#$c = Compressors\Css::process($c);
 							break;
 
 						case 'script':
-							$c = Compressors\Js::minify($c);
+							$c = \JSMin::minify($c);
+							#$c = Compressors\Js::minify($c);
 							break;
 					}
 				}
 
-				$content .= "/* {$asset['source']} */\n$c\n\n";
+				if( $this->show_refer )
+				{
+					$content .= "/* {$asset['source']} */\n$c\n\n";
+				}
+				else
+				{
+					$content .= "/* --- */\n$c\n\n";
+				}
 			}
 
 			File::put($file, $content);
