@@ -220,24 +220,24 @@ class Container
 			return $this->prepareForController(array_merge($assets,$assets_external_cdn), 'style');
 		}
 
+		$links = array();
+		if( ! empty($assets_external_cdn) )
+		{
+			foreach($assets_external_cdn as $asset)
+			{
+				$links[] = Html::cssFile($asset['source'], $asset['attributes']);
+			}
+		}
+
 		if( ! empty($assets) )
 		{
 			if ($this->combine) {
 				$assets = $this->combine($assets, 'style');
 			}
 
-			$links = array();
 			foreach ($assets as $asset) {
 				$url = $this->cdn ? $this->cdn . $asset['url'] : asset($asset['url']);
 				$links[] = Html::cssFile($url, $asset['attributes']);
-			}
-		}
-
-		if( ! empty($assets_external_cdn) )
-		{
-			foreach($assets_external_cdn as $asset)
-			{
-				$links[] = Html::cssFile($asset['source'], $asset['attributes']);
 			}
 		}
 
@@ -277,24 +277,24 @@ class Container
 			return $this->prepareForController(array_merge($assets,$assets_external_cdn), 'script');
 		}
 
+		$links = array();
+		if( ! empty($assets_external_cdn) )
+		{
+			foreach($assets_external_cdn as $asset)
+			{
+				$links[] = Html::scriptFile($asset['source'], $asset['attributes']);
+			}
+		}
+
 		if( ! empty($assets ) )
 		{
 			if ($this->combine) {
 				$assets = $this->combine($assets, 'script');
 			}
 
-			$links = array();
 			foreach ($assets as $asset) {
 				$url = $this->cdn ? $this->cdn . $asset['url'] : asset($asset['url']);
 				$links[] = Html::scriptFile($url, $asset['attributes']);
-			}
-		}
-
-		if( ! empty($assets_external_cdn) )
-		{
-			foreach($assets_external_cdn as $asset)
-			{
-				$links[] = Html::scriptFile($asset['source'], $asset['attributes']);
 			}
 		}
 
