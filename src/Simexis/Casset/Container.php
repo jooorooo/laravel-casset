@@ -110,6 +110,11 @@ class Container
 	public $collections = array();
 	public $show_refer;
 
+	/*
+	 * array
+	 */
+	protected $parameters = [];
+
 	/**
 	 * Initialize an instance of this class.
 	 *
@@ -184,6 +189,22 @@ class Container
 				$this->assets[$source] = compact('ext', 'source', 'attributes', 'dependencies');
 			}
 		}
+
+		return $this;
+	}
+
+	/*
+	 * Add inline javascript parameters
+	 */
+	public function params(array $parameters) {
+		$this->parameters = array_merge($this->parameters, $parameters);
+	}
+
+	/*
+	 * Return empty string for error ignore
+	 */
+	public function __toString() {
+		return '';
 	}
 
 	/**
@@ -277,12 +298,39 @@ class Container
 			return $this->prepareForController(array_merge($assets,$assets_external_cdn), 'script');
 		}
 
-		$links = array();
+		$scripts = array();
+
+        if($this->parameters) {
+            $globals = $objects = [];
+            foreach($this->parameters AS $key => $data) {
+                if(strpos($key, '.')) {
+                    $p = explode('.', $key);
+                    array_pop($p);
+                    $elm = '';
+                    foreach($p AS $e=>$n) {
+                        $elm .= ($elm?'.':'') . $n;
+                        if($e) {
+                            $objects[] = $elm . " = " . Encode::encode('js:' . $elm . ' || {}');
+                        } else {
+                            $globals[] = $elm . " = " . Encode::encode('js:' . $elm . ' || {}');
+                        }
+                    }
+                    $objects[] = $key . " = " . Encode::encode($data);
+                } else {
+                    $globals[] = $key . " = " . Encode::encode($data);
+                }
+            }
+            if($globals)
+                $scripts[] = Html::script('var ' . implode(",\n", $globals) . ';');
+            if($objects)
+                $scripts[] = Html::script(implode(",\n", $objects) . ';');
+        }
+
 		if( ! empty($assets_external_cdn) )
 		{
 			foreach($assets_external_cdn as $asset)
 			{
-				$links[] = Html::scriptFile($asset['source'], $asset['attributes']);
+                $scripts[] = Html::scriptFile($asset['source'], $asset['attributes']);
 			}
 		}
 
@@ -294,11 +342,11 @@ class Container
 
 			foreach ($assets as $asset) {
 				$url = $this->cdn ? $this->cdn . $asset['url'] : asset($asset['url']);
-				$links[] = Html::scriptFile($url, $asset['attributes']);
+                $scripts[] = Html::scriptFile($url, $asset['attributes']);
 			}
 		}
 
-		return implode('', $links);
+		return implode('', $scripts);
 	}
 
 	/**
